@@ -42,7 +42,7 @@ export const parseSearchQuery = (query: string) => {
 };
 
 export const isValidDate = (dateStr: string): boolean => {
-  const slowDateLike = /^(\d+)+-(\d+)+-(\d+)+$/;
+  const slowDateLike = /^(\d+)-(\d+)-(\d+)$/;
   if (!slowDateLike.test(dateStr)) return false;
 
   const date = new Date(dateStr);
