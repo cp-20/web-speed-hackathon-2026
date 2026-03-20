@@ -7,10 +7,11 @@ import { fetchBinary } from "@web-speed-hackathon-2026/client/src/utils/fetchers
 import { getSoundPath } from "@web-speed-hackathon-2026/client/src/utils/get_path";
 
 interface Props {
+  prioritizeMedia?: boolean;
   sound: Models.Sound;
 }
 
-export const SoundPlayer = ({ sound }: Props) => {
+export const SoundPlayer = ({ sound, prioritizeMedia = false }: Props) => {
   const { data, isLoading } = useFetch(getSoundPath(sound.id), fetchBinary);
 
   const blobUrl = useMemo(() => {
@@ -42,7 +43,13 @@ export const SoundPlayer = ({ sound }: Props) => {
 
   return (
     <div className="bg-cax-surface-subtle flex h-full w-full items-center justify-center">
-      <audio ref={audioRef} loop={true} onTimeUpdate={handleTimeUpdate} src={blobUrl} />
+      <audio
+        ref={audioRef}
+        loop={true}
+        onTimeUpdate={handleTimeUpdate}
+        preload={prioritizeMedia ? "auto" : "metadata"}
+        src={blobUrl}
+      />
       <div className="p-2">
         <button
           className="bg-cax-accent text-cax-surface-raised flex h-8 w-8 items-center justify-center rounded-full text-sm hover:opacity-75"
@@ -63,7 +70,7 @@ export const SoundPlayer = ({ sound }: Props) => {
           <div className="aspect-10/1">
             <div className="relative h-full w-full">
               <div className="absolute inset-0 h-full w-full">
-                <SoundWaveSVG soundId={sound.id} />
+                <SoundWaveSVG prioritizeMedia={prioritizeMedia} soundId={sound.id} />
               </div>
               <div
                 className="bg-cax-surface-subtle absolute inset-0 h-full w-full opacity-75"
