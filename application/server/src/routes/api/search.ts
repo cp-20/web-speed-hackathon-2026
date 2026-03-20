@@ -47,8 +47,9 @@ searchRouter.get("/search", async (req, res) => {
   if (untilDate) {
     dateConditions.push({ [Op.lte]: untilDate });
   }
-  const dateWhere =
-    dateConditions.length > 0 ? { createdAt: Object.assign({}, ...dateConditions) } : {};
+  const dateWhere = dateConditions.length > 0
+    ? { createdAt: Object.assign({}, ...dateConditions) }
+    : {};
 
   const whereClauses: object[] = [];
   if (Object.keys(dateWhere).length > 0) {
@@ -64,7 +65,9 @@ searchRouter.get("/search", async (req, res) => {
     });
   }
 
-  const where = whereClauses.length > 0 ? { [Op.and]: whereClauses } : undefined;
+  const where = whereClauses.length > 0
+    ? { [Op.and]: whereClauses }
+    : undefined;
 
   const result = await Post.findAll({
     limit,

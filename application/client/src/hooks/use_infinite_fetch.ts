@@ -2,7 +2,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const LIMIT = 30;
 
-function buildPaginatedPath(apiPath: string, offset: number, limit: number): string {
+function buildPaginatedPath(
+  apiPath: string,
+  offset: number,
+  limit: number,
+): string {
   const [rawPath, rawQuery = ""] = apiPath.split("?");
   const path = rawPath ?? "";
   const params = new URLSearchParams(rawQuery);
