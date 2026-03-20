@@ -1,12 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 
+function getLocationSearch(): string {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  return window.location.search;
+}
+
 export function useSearchParams(): [URLSearchParams] {
   const [searchParams, setSearchParams] = useState(
-    () => new URLSearchParams(window.location.search),
+    () => new URLSearchParams(getLocationSearch()),
   );
-  const lastSearchRef = useRef(window.location.search);
+  const lastSearchRef = useRef(getLocationSearch());
 
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
     const syncSearchParams = () => {
       const currentSearch = window.location.search;
       if (currentSearch !== lastSearchRef.current) {

@@ -11,6 +11,7 @@
     "typecheck": "tsc",
     "font:subset:terms": "node ./scripts/generate-terms-font-subset.mjs"
   },
+  "type": "module",
   "dependencies": {
     "@mlc-ai/web-llm": "0.2.80",
     "@tailwindcss/vite": "4.2.2",
@@ -29,6 +30,7 @@
     "rehype-katex": "7.0.1",
     "remark-gfm": "4.0.1",
     "remark-math": "6.0.0",
+    "swr": "2.4.1",
     "tailwindcss": "4.2.2",
     "tiny-invariant": "1.3.3"
   },
@@ -39,11 +41,12 @@
     "@types/node": "22.18.8",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.1",
+    "@types/react-helmet": "6.1.11",
     "@types/react-syntax-highlighter": "15.5.13",
     "@vitejs/plugin-react": "5.0.4",
     "react-markdown": "10.1.0",
-    "subset-font": "2.4.0",
     "rollup-plugin-visualizer": "6.0.3",
+    "subset-font": "2.4.0",
     "typescript": "5.9.3",
     "vite": "7.1.7"
   },

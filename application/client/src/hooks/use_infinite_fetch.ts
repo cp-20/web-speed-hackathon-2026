@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useMemo } from "react";
+import useSWRInfinite, { SWRInfiniteKeyLoader } from "swr/infinite";
 
 const LIMIT = 30;
+const EMPTY_LIST: [] = [];
 
 function buildPaginatedPath(
   apiPath: string,
@@ -25,91 +27,76 @@ interface ReturnValues<T> {
   fetchMore: () => void;
 }
 
+interface Options<T> {
+  initialData?: Array<T>;
+}
+
 export function useInfiniteFetch<T>(
   apiPath: string,
   fetcher: (apiPath: string) => Promise<T[]>,
+  options?: Options<T>,
 ): ReturnValues<T> {
-  const internalRef = useRef({ isLoading: false, offset: 0, hasMore: true });
+  const initialData = options?.initialData ?? EMPTY_LIST;
+  const hasInitialData = initialData.length > 0;
 
-  const [result, setResult] = useState<Omit<ReturnValues<T>, "fetchMore">>({
-    data: [],
-    error: null,
-    isLoading: true,
-  });
+  const getKey: SWRInfiniteKeyLoader = (index) => {
+    if (apiPath === "") {
+      return null;
+    }
+    return buildPaginatedPath(apiPath, index * LIMIT, LIMIT);
+  };
+
+  const { data, error, isLoading, setSize } = useSWRInfinite(
+    getKey,
+    fetcher,
+    {
+      fallbackData: hasInitialData ? [initialData] : undefined,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 60000,
+    },
+  );
+
+  const flatData = useMemo(() => {
+    if (data) {
+      return data.reduce((acc: T[], page: T[]) => [...acc, ...page], []);
+    }
+    return hasInitialData ? initialData : [];
+  }, [data, hasInitialData, initialData]);
+
+  const hasMore = useMemo(() => {
+    if (apiPath === "") {
+      return false;
+    }
+
+    if (data == null) {
+      return true;
+    }
+
+    const lastPage = data[data.length - 1];
+    if (lastPage == null) {
+      return false;
+    }
+
+    return lastPage.length === LIMIT;
+  }, [apiPath, data]);
 
   const fetchMore = useCallback(() => {
-    const { isLoading, offset, hasMore } = internalRef.current;
-    if (isLoading || !hasMore || apiPath === "") {
+    if (apiPath === "") {
       return;
     }
 
-    setResult((cur) => ({
-      ...cur,
-      isLoading: true,
-    }));
-    internalRef.current = {
-      isLoading: true,
-      offset,
-      hasMore,
-    };
-
-    void fetcher(buildPaginatedPath(apiPath, offset, LIMIT)).then(
-      (pageData) => {
-        const nextOffset = offset + pageData.length;
-        const nextHasMore = pageData.length === LIMIT;
-
-        setResult((cur) => ({
-          ...cur,
-          data: [...cur.data, ...pageData],
-          isLoading: false,
-        }));
-        internalRef.current = {
-          isLoading: false,
-          offset: nextOffset,
-          hasMore: nextHasMore,
-        };
-      },
-      (error) => {
-        setResult((cur) => ({
-          ...cur,
-          error,
-          isLoading: false,
-        }));
-        internalRef.current = {
-          isLoading: false,
-          offset,
-          hasMore,
-        };
-      },
-    );
-  }, [apiPath, fetcher]);
-
-  useEffect(() => {
-    setResult(() => ({
-      data: [],
-      error: null,
-      isLoading: true,
-    }));
-    internalRef.current = {
-      isLoading: false,
-      offset: 0,
-      hasMore: true,
-    };
-
-    if (apiPath !== "") {
-      fetchMore();
+    if (!hasMore || isLoading) {
       return;
     }
 
-    setResult(() => ({
-      data: [],
-      error: null,
-      isLoading: false,
-    }));
-  }, [fetchMore]);
+    void setSize((prev) => prev + 1);
+  }, [apiPath, hasMore, isLoading, setSize]);
 
   return {
-    ...result,
+    data: flatData,
+    error: error ?? null,
+    isLoading: isLoading || (data === undefined && hasInitialData === false),
     fetchMore,
   };
 }

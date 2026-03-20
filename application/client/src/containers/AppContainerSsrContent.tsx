@@ -1,11 +1,7 @@
-import { useCallback, useEffect } from "react";
-import { Helmet } from "react-helmet";
-import { Route, Routes, useLocation, useNavigate } from "react-router";
-import { useSWRConfig } from "swr";
+import { Route, Routes } from "react-router";
 
 import { AppPage } from "@web-speed-hackathon-2026/client/src/components/application/AppPage";
 import { AuthModalContainer } from "@web-speed-hackathon-2026/client/src/containers/AuthModalContainer";
-import { CrokContainer } from "@web-speed-hackathon-2026/client/src/containers/CrokContainer";
 import { DirectMessageContainer } from "@web-speed-hackathon-2026/client/src/containers/DirectMessageContainer";
 import { DirectMessageListContainer } from "@web-speed-hackathon-2026/client/src/containers/DirectMessageListContainer";
 import { NewPostModalContainer } from "@web-speed-hackathon-2026/client/src/containers/NewPostModalContainer";
@@ -15,14 +11,8 @@ import { SearchContainer } from "@web-speed-hackathon-2026/client/src/containers
 import { TermContainer } from "@web-speed-hackathon-2026/client/src/containers/TermContainer";
 import { TimelineContainer } from "@web-speed-hackathon-2026/client/src/containers/TimelineContainer";
 import { UserProfileContainer } from "@web-speed-hackathon-2026/client/src/containers/UserProfileContainer";
-import { useFetch } from "@web-speed-hackathon-2026/client/src/hooks/use_fetch";
-import { fetchJSON, sendJSON } from "@web-speed-hackathon-2026/client/src/utils/fetchers";
 
-/**
- * SSR-safe なコンポーネント（副作用なし）
- * サーバー側で使用
- */
-interface AppContainerContentProps {
+interface AppContainerSsrContentProps {
   activeUser: Models.User | null;
   authModalId: string;
   newPostModalId: string;
@@ -30,13 +20,15 @@ interface AppContainerContentProps {
   onUpdateActiveUser: (user: Models.User) => void;
 }
 
-export const AppContainerContent = ({
+const CrokSsrPlaceholder = () => null;
+
+export const AppContainerSsrContent = ({
   activeUser,
   authModalId,
   newPostModalId,
   onLogout,
   onUpdateActiveUser,
-}: AppContainerContentProps) => {
+}: AppContainerSsrContentProps) => {
   return (
     <>
       <AppPage
@@ -48,9 +40,7 @@ export const AppContainerContent = ({
         <Routes>
           <Route element={<TimelineContainer />} path="/" />
           <Route
-            element={
-              <DirectMessageListContainer activeUser={activeUser} authModalId={authModalId} />
-            }
+            element={<DirectMessageListContainer activeUser={activeUser} authModalId={authModalId} />}
             path="/dm"
           />
           <Route
@@ -61,10 +51,7 @@ export const AppContainerContent = ({
           <Route element={<UserProfileContainer />} path="/users/:username" />
           <Route element={<PostContainer />} path="/posts/:postId" />
           <Route element={<TermContainer />} path="/terms" />
-          <Route
-            element={<CrokContainer activeUser={activeUser} authModalId={authModalId} />}
-            path="/crok"
-          />
+          <Route element={<CrokSsrPlaceholder />} path="/crok" />
           <Route element={<NotFoundContainer />} path="*" />
         </Routes>
       </AppPage>
@@ -72,54 +59,5 @@ export const AppContainerContent = ({
       <AuthModalContainer id={authModalId} onUpdateActiveUser={onUpdateActiveUser} />
       <NewPostModalContainer id={newPostModalId} />
     </>
-  );
-};
-
-export const AppContainer = () => {
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
-  const { mutate } = useSWRConfig();
-
-  const { data: activeUser, isLoading: isLoadingActiveUser } = useFetch<Models.User>(
-    "/api/v1/me",
-    fetchJSON,
-  );
-
-  const handleLogout = useCallback(async () => {
-    await sendJSON("/api/v1/signout", {});
-    await mutate("/api/v1/me", null);
-    navigate("/");
-  }, [navigate, mutate]);
-
-  const handleUpdateActiveUser = useCallback(
-    (user: Models.User) => {
-      void mutate("/api/v1/me", user);
-    },
-    [mutate],
-  );
-
-  const authModalId = "auth-modal";
-  const newPostModalId = "new-post-modal";
-
-  if (isLoadingActiveUser) {
-    return (
-      <Helmet>
-        <title>読込中 - CaX</title>
-      </Helmet>
-    );
-  }
-
-  return (
-    <AppContainerContent
-      activeUser={activeUser}
-      authModalId={authModalId}
-      newPostModalId={newPostModalId}
-      onLogout={handleLogout}
-      onUpdateActiveUser={handleUpdateActiveUser}
-    />
   );
 };

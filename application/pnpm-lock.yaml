@@ -72,6 +72,9 @@ importers:
       remark-math:
         specifier: 6.0.0
         version: 6.0.0
+      swr:
+        specifier: 2.4.1
+        version: 2.4.1(react@19.2.0)
       tailwindcss:
         specifier: 4.2.2
         version: 4.2.2
@@ -97,6 +100,9 @@ importers:
       '@types/react-dom':
         specifier: 19.2.1
         version: 19.2.1(@types/react@19.2.2)
+      '@types/react-helmet':
+        specifier: 6.1.11
+        version: 6.1.11
       '@types/react-syntax-highlighter':
         specifier: 15.5.13
         version: 15.5.13
@@ -136,6 +142,9 @@ importers:
       '@tsconfig/strictest':
         specifier: 2.0.8
         version: 2.0.8
+      '@web-speed-hackathon-2026/client':
+        specifier: workspace:*
+        version: link:../client
       '@web-speed-hackathon-2026/server':
         specifier: workspace:*
         version: 'link:'
@@ -175,6 +184,15 @@ importers:
       negaposi-analyzer-ja:
         specifier: 1.0.1
         version: 1.0.1
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
+      react-dom:
+        specifier: 19.2.0
+        version: 19.2.0(react@19.2.0)
+      react-router:
+        specifier: 7.9.4
+        version: 7.9.4(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       sequelize:
         specifier: 6.37.7
         version: 6.37.7(sqlite3@5.1.7)
@@ -187,6 +205,9 @@ importers:
       sqlite3:
         specifier: 5.1.7
         version: 5.1.7
+      swr:
+        specifier: 2.4.1
+        version: 2.4.1(react@19.2.0)
       tsx:
         specifier: 4.20.6
         version: 4.20.6
@@ -224,6 +245,12 @@ importers:
       '@types/node':
         specifier: 22.18.8
         version: 22.18.8
+      '@types/react':
+        specifier: 19.2.2
+        version: 19.2.2
+      '@types/react-dom':
+        specifier: 19.2.1
+        version: 19.2.1(@types/react@19.2.2)
       '@types/serve-static':
         specifier: 1.15.9
         version: 1.15.9
@@ -1186,6 +1213,9 @@ packages:
     resolution: {integrity: sha512-/EEvYBdT3BflCWvTMO7YkYBHVE9Ci6XdqZciZANQgKpaiDRGOLIlRo91jbTNRQjgPFWVaRxcYc0luVNFitz57A==}
     peerDependencies:
       '@types/react': ^19.2.0
+
+  '@types/react-helmet@6.1.11':
+    resolution: {integrity: sha512-0QcdGLddTERotCXo3VFlUSWO3ztraw8nZ6e3zJSgG7apwV5xt+pJUS8ewPBqT4NYB1optGLprNQzFleIY84u/g==}
 
   '@types/react-syntax-highlighter@15.5.13':
     resolution: {integrity: sha512-uLGJ87j6Sz8UaBAooU0T6lWJ0dBmjZgN1PZTrj05TNql2/XpC6+4HhMT5syIdFUUt+FASfCeLLv4kBygNU+8qA==}
@@ -2729,6 +2759,11 @@ packages:
   subset-font@2.4.0:
     resolution: {integrity: sha512-DA/45nIj4NiseVdfHxVdVGL7hvNo3Ol6HjEm3KSYtPyDcsr6jh8Q37vSgz+A722wMfUd6nL8kgsi7uGv9DExXQ==}
 
+  swr@2.4.1:
+    resolution: {integrity: sha512-2CC6CiKQtEwaEeNiqWTAw9PGykW8SR5zZX8MZk6TeAvEAnVS7Visz8WzphqgtQ8v2xz/4Q5K+j+SeMaKXeeQIA==}
+    peerDependencies:
+      react: ^16.11.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
   tailwindcss@4.2.2:
     resolution: {integrity: sha512-KWBIxs1Xb6NoLdMVqhbhgwZf2PGBpPEiwOqgI4pFIYbNTfBXiKYyWoTsXgBQ9WFg/OlhnvHaY+AEpW7wSmFo2Q==}
 
@@ -2858,6 +2893,11 @@ packages:
     hasBin: true
     peerDependencies:
       browserslist: '>= 4.21.0'
+
+  use-sync-external-store@1.6.0:
+    resolution: {integrity: sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
@@ -3690,6 +3730,10 @@ snapshots:
   '@types/range-parser@1.2.7': {}
 
   '@types/react-dom@19.2.1(@types/react@19.2.2)':
+    dependencies:
+      '@types/react': 19.2.2
+
+  '@types/react-helmet@6.1.11':
     dependencies:
       '@types/react': 19.2.2
 
@@ -5730,6 +5774,12 @@ snapshots:
       lodash: 4.17.21
       p-limit: 3.1.0
 
+  swr@2.4.1(react@19.2.0):
+    dependencies:
+      dequal: 2.0.3
+      react: 19.2.0
+      use-sync-external-store: 1.6.0(react@19.2.0)
+
   tailwindcss@4.2.2: {}
 
   tapable@2.3.0: {}
@@ -5883,6 +5933,10 @@ snapshots:
       browserslist: 4.26.3
       escalade: 3.2.0
       picocolors: 1.1.1
+
+  use-sync-external-store@1.6.0(react@19.2.0):
+    dependencies:
+      react: 19.2.0
 
   util-deprecate@1.0.2: {}
 
