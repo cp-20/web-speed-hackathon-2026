@@ -4,13 +4,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@web-speed-hackathon-2026/client/src/components/foundation/FontAwesomeIcon";
 
 interface Props {
+  preload?: "none" | "metadata" | "auto";
   src: string;
 }
 
 /**
  * 標準の video 要素を使った再生コンポーネント。
  */
-export const PausableMovie = ({ src }: Props) => {
+export const PausableMovie = ({ src, preload = "metadata" }: Props) => {
   const prefersReducedMotion =
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -69,7 +70,7 @@ export const PausableMovie = ({ src }: Props) => {
           loop
           muted
           playsInline
-          preload="metadata"
+          preload={preload}
         >
           <source src={src} type="video/mp4" />
         </video>

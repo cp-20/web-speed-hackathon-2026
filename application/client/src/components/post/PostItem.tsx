@@ -8,9 +8,10 @@ import { formatJaLongDate, toIsoDateTime } from "@web-speed-hackathon-2026/clien
 
 interface Props {
   post: Models.Post;
+  prioritizeMedia?: boolean;
 }
 
-export const PostItem = ({ post }: Props) => {
+export const PostItem = ({ post, prioritizeMedia = false }: Props) => {
   const createdAtIso = toIsoDateTime(post.createdAt);
   const createdAtLabel = formatJaLongDate(post.createdAt);
 
@@ -57,12 +58,16 @@ export const PostItem = ({ post }: Props) => {
           </div>
           {post.images?.length > 0 ? (
             <div className="relative mt-2 w-full">
-              <ImageArea images={post.images} />
+              <ImageArea
+                fetchPriority={prioritizeMedia ? "high" : "auto"}
+                images={post.images}
+                loading={prioritizeMedia ? "eager" : "lazy"}
+              />
             </div>
           ) : null}
           {post.movie ? (
             <div className="relative mt-2 w-full">
-              <MovieArea movie={post.movie} />
+              <MovieArea movie={post.movie} preload={prioritizeMedia ? "auto" : "metadata"} />
             </div>
           ) : null}
           {post.sound ? (
