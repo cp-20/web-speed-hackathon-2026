@@ -1,4 +1,4 @@
-const DEFAULT_TTL_MS = 300_000;
+const DEFAULT_TTL_MS = 3600_000;
 
 interface CacheEntry {
   html: string;
