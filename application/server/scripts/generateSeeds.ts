@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import exifr from "exifr";
 import { faker } from "@faker-js/faker/locale/ja";
 import sharp from "sharp";
+import { writeWaveformSvgFile } from "@web-speed-hackathon-2026/server/src/utils/sound_waveform";
 
 // Set seed for reproducible results
 faker.seed(123);
@@ -476,13 +477,22 @@ function generateMovies(): MovieSeed[] {
   }));
 }
 
-function generateSounds(): SoundSeed[] {
+async function generateSounds(): Promise<SoundSeed[]> {
   // Use existing sound data from public/sounds/
-  return EXISTING_SOUNDS.map(({ id, title, artist }) => ({
-    id,
-    title,
-    artist,
-  }));
+  return await Promise.all(
+    EXISTING_SOUNDS.map(async ({ id, title, artist }) => {
+      await writeWaveformSvgFile(
+        path.resolve(publicDir, `./sounds/${id}.mp3`),
+        path.resolve(publicDir, `./sounds-waveforms/${id}.svg`),
+      );
+
+      return {
+        id,
+        title,
+        artist,
+      };
+    }),
+  );
 }
 
 const postTemplates = [
@@ -993,7 +1003,7 @@ async function main() {
   const movies = generateMovies();
 
   console.log("5. Generating Sounds (using existing assets)...");
-  const sounds = generateSounds();
+  const sounds = await generateSounds();
 
   console.log("6. Generating Posts...");
   const posts = generatePosts(CONFIG.POST_COUNT, users, movies, sounds);

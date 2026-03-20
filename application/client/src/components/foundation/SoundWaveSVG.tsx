@@ -1,88 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-
-interface ParsedData {
-  max: number;
-  peaks: number[];
-}
-
-function mean(values: number[]): number {
-  if (values.length === 0) {
-    return 0;
-  }
-
-  const sum = values.reduce((acc, value) => acc + value, 0);
-  return sum / values.length;
-}
-
-function chunk<T>(values: T[], size: number): T[][] {
-  if (size <= 0) {
-    return [];
-  }
-
-  const result: T[][] = [];
-  for (let i = 0; i < values.length; i += size) {
-    result.push(values.slice(i, i + size));
-  }
-  return result;
-}
-
-async function calculate(data: ArrayBuffer): Promise<ParsedData> {
-  const audioCtx = new AudioContext();
-
-  // 音声をデコードする
-  const buffer = await audioCtx.decodeAudioData(data.slice(0));
-  // 左の音声データの絶対値を取る
-  const leftData = Array.from(buffer.getChannelData(0), Math.abs);
-  // 右の音声データの絶対値を取る
-  const rightData = Array.from(buffer.getChannelData(1), Math.abs);
-
-  // 左右の音声データの平均を取る
-  const normalized = leftData.map((left, index) => {
-    const right = rightData[index] ?? 0;
-    return (left + right) / 2;
-  });
-  // 100 個の chunk に分ける
-  const chunks = chunk(normalized, Math.ceil(normalized.length / 100));
-  // chunk ごとに平均を取る
-  const peaks = chunks.map(mean);
-  // chunk の平均の中から最大値を取る
-  const max = peaks.length > 0 ? Math.max(...peaks) : 0;
-
-  return { max, peaks };
-}
+import { getSoundWaveformPath } from "@web-speed-hackathon-2026/client/src/utils/get_path";
 
 interface Props {
-  soundData: ArrayBuffer;
+  soundId: string;
 }
 
-export const SoundWaveSVG = ({ soundData }: Props) => {
-  const uniqueIdRef = useRef(Math.random().toString(16));
-  const [{ max, peaks }, setPeaks] = useState<ParsedData>({
-    max: 0,
-    peaks: [],
-  });
-
-  useEffect(() => {
-    calculate(soundData).then(({ max, peaks }) => {
-      setPeaks({ max, peaks });
-    });
-  }, [soundData]);
-
-  return (
-    <svg className="h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 1">
-      {peaks.map((peak, idx) => {
-        const ratio = peak / max;
-        return (
-          <rect
-            key={`${uniqueIdRef.current}#${idx}`}
-            fill="var(--color-cax-accent)"
-            height={ratio}
-            width="1"
-            x={idx}
-            y={1 - ratio}
-          />
-        );
-      })}
-    </svg>
-  );
+export const SoundWaveSVG = ({ soundId }: Props) => {
+  return <img alt="" className="h-full w-full" src={getSoundWaveformPath(soundId)} />;
 };

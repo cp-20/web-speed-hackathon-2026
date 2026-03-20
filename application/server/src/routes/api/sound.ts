@@ -7,6 +7,7 @@ import httpErrors from "http-errors";
 import { v4 as uuidv4 } from "uuid";
 
 import { UPLOAD_PATH } from "@web-speed-hackathon-2026/server/src/paths";
+import { writeWaveformSvgFile } from "@web-speed-hackathon-2026/server/src/utils/sound_waveform";
 import { convertSoundToMp3 } from "@web-speed-hackathon-2026/server/src/utils/transcode_media.js";
 
 // 変換した音声の拡張子
@@ -47,6 +48,10 @@ soundRouter.post("/sounds", async (req, res) => {
   );
   await fs.mkdir(path.resolve(UPLOAD_PATH, "sounds"), { recursive: true });
   await fs.writeFile(filePath, converted);
+  await writeWaveformSvgFile(
+    filePath,
+    path.resolve(UPLOAD_PATH, `./sounds-waveforms/${soundId}.svg`),
+  );
 
   return res.status(200).type("application/json").send({
     artist,
