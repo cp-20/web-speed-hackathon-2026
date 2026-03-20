@@ -1,6 +1,5 @@
 import { BM25 } from "bayesian-bm25";
 import kuromoji, { type IpadicFeatures, type Tokenizer } from "kuromoji";
-import _ from "lodash";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -61,21 +60,18 @@ export function filterSuggestionsBM25(
   );
   bm25.index(tokenizedCandidates);
 
-  const results = _.zipWith(
-    candidates,
-    bm25.getScores(queryTokens),
-    (text, score) => {
-      return { text, score };
-    },
-  );
+  const scores = bm25.getScores(queryTokens);
+  const results = candidates.map((text, index) => ({
+    score: scores[index] ?? 0,
+    text,
+  }));
 
   // スコアが高い（＝類似度が高い）ものが下に来るように、上位10件を取得する
-  return _(results)
+  return results
     .filter((item) => item.score > 0)
-    .sortBy(["score"])
+    .sort((a, b) => a.score - b.score)
     .slice(-10)
-    .map((item) => item.text)
-    .value();
+    .map((item) => item.text);
 }
 
 export async function getCrokSuggestionsByBM25(

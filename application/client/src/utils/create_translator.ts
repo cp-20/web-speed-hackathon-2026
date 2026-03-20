@@ -25,10 +25,16 @@ export async function createTranslator(params: Params): Promise<Translator> {
   ]);
 
   const sourceLang = langs.where("1", params.sourceLanguage);
-  invariant(sourceLang, `Unsupported source language code: ${params.sourceLanguage}`);
+  invariant(
+    sourceLang,
+    `Unsupported source language code: ${params.sourceLanguage}`,
+  );
 
   const targetLang = langs.where("1", params.targetLanguage);
-  invariant(targetLang, `Unsupported target language code: ${params.targetLanguage}`);
+  invariant(
+    targetLang,
+    `Unsupported target language code: ${params.targetLanguage}`,
+  );
 
   const engine = await CreateMLCEngine("gemma-2-2b-jpn-it-q4f16_1-MLC");
 
@@ -58,7 +64,10 @@ export async function createTranslator(params: Params): Promise<Translator> {
       });
 
       const content = reply.choices[0]!.message.content;
-      invariant(content, "No content in the reply from the translation engine.");
+      invariant(
+        content,
+        "No content in the reply from the translation engine.",
+      );
 
       const parsed = JSONRepairJS.loads(content) as { result?: unknown } | null;
       invariant(
