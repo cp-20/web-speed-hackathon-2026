@@ -1,8 +1,12 @@
-import { CreateMLCEngine } from "@mlc-ai/web-llm";
-import { stripIndents } from "common-tags";
-import * as JSONRepairJS from "json-repair-js";
-import langs from "langs";
-import invariant from "tiny-invariant";
+function invariant(condition: unknown, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+async function loadModule(specifier: string): Promise<any> {
+  return import(/* @vite-ignore */ specifier);
+}
 
 interface Translator {
   translate(text: string): Promise<string>;
@@ -15,6 +19,11 @@ interface Params {
 }
 
 export async function createTranslator(params: Params): Promise<Translator> {
+  const [{ CreateMLCEngine }, { default: langs }] = await Promise.all([
+    loadModule("@mlc-ai/web-llm"),
+    loadModule("langs"),
+  ]);
+
   const sourceLang = langs.where("1", params.sourceLanguage);
   invariant(sourceLang, `Unsupported source language code: ${params.sourceLanguage}`);
 
@@ -25,6 +34,11 @@ export async function createTranslator(params: Params): Promise<Translator> {
 
   return {
     async translate(text: string): Promise<string> {
+      const [{ stripIndents }, JSONRepairJS] = await Promise.all([
+        loadModule("common-tags"),
+        loadModule("json-repair-js"),
+      ]);
+
       const reply = await engine.chat.completions.create({
         messages: [
           {
@@ -46,7 +60,7 @@ export async function createTranslator(params: Params): Promise<Translator> {
       const content = reply.choices[0]!.message.content;
       invariant(content, "No content in the reply from the translation engine.");
 
-      const parsed = JSONRepairJS.loads(content);
+      const parsed = JSONRepairJS.loads(content) as { result?: unknown } | null;
       invariant(
         parsed != null && "result" in parsed,
         "The translation result is missing in the reply.",
