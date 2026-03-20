@@ -55,7 +55,7 @@ test.describe("ホーム", () => {
   });
 
   test("投稿クリック → 投稿詳細に遷移する", async ({ page }) => {
-    const firstArticle = page.locator("article").first();
+    const firstArticle = page.locator("article").first().locator("p").first();
     await expect(firstArticle).toBeVisible({ timeout: 30_000 });
     await firstArticle.click();
     await page.waitForURL("**/posts/*", { timeout: 10_000 });
