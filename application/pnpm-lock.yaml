@@ -160,6 +160,9 @@ importers:
       connect-history-api-fallback:
         specifier: 2.0.0
         version: 2.0.0
+      encoding-japanese:
+        specifier: 2.2.0
+        version: 2.2.0
       exifr:
         specifier: 7.1.3
         version: 7.1.3
@@ -230,6 +233,9 @@ importers:
       '@types/connect-history-api-fallback':
         specifier: 1.5.4
         version: 1.5.4
+      '@types/encoding-japanese':
+        specifier: 2.2.1
+        version: 2.2.1
       '@types/express':
         specifier: 5.0.3
         version: 5.0.3
@@ -1158,6 +1164,9 @@ packages:
   '@types/doublearray@0.0.32':
     resolution: {integrity: sha512-HloTru3I3a55runIVqZX1YBQi2L5A4peNQPh33yshzB4ttt1qHCnHPkuhy9Djy/cTx7i5xJvxItKRPCmvnfpGw==}
 
+  '@types/encoding-japanese@2.2.1':
+    resolution: {integrity: sha512-6jjepuTusvySxMLP7W6usamlbgf0F4sIDvm7EzYePjLHY7zWUv4yz2PLUnu0vuNVtXOTLu2cRdFcDg40J5Owsw==}
+
   '@types/estree-jsx@1.0.5':
     resolution: {integrity: sha512-52CcUVNFyfb1A2ALocQw/Dd1BQFNmSdkuC3BkZ6iqhdMfQz7JWOFRuJFloOzjk+6WijU56m9oKXFAXc7o3Towg==}
 
@@ -1541,6 +1550,10 @@ packages:
   encodeurl@2.0.0:
     resolution: {integrity: sha512-Q0n9HRi4m6JuGIV1eFlmvJB7ZEVxu93IrMyiMsGC0lrMJMWzRgx6WGquyfQgZVb31vhGgXnfmPNNXmxnOkRBrg==}
     engines: {node: '>= 0.8'}
+
+  encoding-japanese@2.2.0:
+    resolution: {integrity: sha512-EuJWwlHPZ1LbADuKTClvHtwbaFn4rOD+dRAbWysqEOXRc2Uui0hJInNJrsdH0c+OhJA4nrCBdSkW4DD5YxAo6A==}
+    engines: {node: '>=8.10.0'}
 
   encoding@0.1.13:
     resolution: {integrity: sha512-ETBauow1T35Y/WZMkio9jiM0Z5xjHHmJ4XmjZOq1l/dXz3lr2sRn87nJy20RupqSh1F2m3HHPSp8ShIPQJrJ3A==}
@@ -3674,6 +3687,8 @@ snapshots:
 
   '@types/doublearray@0.0.32': {}
 
+  '@types/encoding-japanese@2.2.1': {}
+
   '@types/estree-jsx@1.0.5':
     dependencies:
       '@types/estree': 1.0.8
@@ -4063,6 +4078,8 @@ snapshots:
   emoji-regex@8.0.0: {}
 
   encodeurl@2.0.0: {}
+
+  encoding-japanese@2.2.0: {}
 
   encoding@0.1.13:
     dependencies:

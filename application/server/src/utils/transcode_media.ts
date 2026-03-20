@@ -3,7 +3,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import * as MusicMetadata from "music-metadata";
+import Encoding from "encoding-japanese";
 
 const UNKNOWN_ARTIST = "Unknown Artist";
 const UNKNOWN_TITLE = "Unknown Title";
@@ -11,6 +11,11 @@ const UNKNOWN_TITLE = "Unknown Title";
 interface SoundConversionResult {
   artist: string;
   audio: Buffer;
+  title: string;
+}
+
+interface SoundMetadata {
+  artist: string;
   title: string;
 }
 
@@ -44,6 +49,52 @@ function runFfmpeg(args: string[]): Promise<void> {
       reject(error);
     });
   });
+}
+
+function parseFFmetadata(ffmetadata: string): Partial<SoundMetadata> {
+  return Object.fromEntries(
+    ffmetadata
+      .split("\n")
+      .filter((line) => !line.startsWith(";") && line.includes("="))
+      .map((line) => {
+        const separatorIndex = line.indexOf("=");
+        const key = line.slice(0, separatorIndex).trim();
+        const value = line.slice(separatorIndex + 1).trim();
+        return [key, value] as const;
+      }),
+  ) as Partial<SoundMetadata>;
+}
+
+async function extractMetadataFromSound(data: Buffer): Promise<SoundMetadata> {
+  const tmpDir = await mkdtemp(path.join(os.tmpdir(), "cax-sound-meta-"));
+  const inputPath = path.join(tmpDir, "input");
+  const metadataPath = path.join(tmpDir, "meta.txt");
+
+  try {
+    await writeFile(inputPath, data);
+
+    await runFfmpeg(["-i", inputPath, "-f", "ffmetadata", metadataPath]);
+
+    const output = await readFile(metadataPath);
+    const outputUtf8 = Encoding.convert(output, {
+      from: "AUTO",
+      to: "UNICODE",
+      type: "string",
+    });
+    const meta = parseFFmetadata(outputUtf8);
+
+    return {
+      artist: meta.artist ?? UNKNOWN_ARTIST,
+      title: meta.title ?? UNKNOWN_TITLE,
+    };
+  } catch {
+    return {
+      artist: UNKNOWN_ARTIST,
+      title: UNKNOWN_TITLE,
+    };
+  } finally {
+    await rm(tmpDir, { force: true, recursive: true });
+  }
 }
 
 export async function convertMovieToMp4(data: Buffer): Promise<Buffer> {
@@ -89,11 +140,9 @@ export async function convertSoundToMp3(
   const outputPath = path.join(tmpDir, "output.mp3");
 
   try {
-    const metadata = await MusicMetadata.parseBuffer(data).catch(() =>
-      undefined
-    );
-    const artist = metadata?.common.artist ?? UNKNOWN_ARTIST;
-    const title = metadata?.common.title ?? UNKNOWN_TITLE;
+    const metadata = await extractMetadataFromSound(data);
+    const artist = metadata.artist;
+    const title = metadata.title;
 
     await writeFile(inputPath, data);
 
