@@ -66,7 +66,7 @@ export default defineConfig(async () => {
       host: '0.0.0.0',
       port: 8080,
       proxy: {
-        '/api': 'http://localhost:3000',
+        '/api': { target: 'http://localhost:3000', ws: true },
         '/images': 'http://localhost:3000',
         '/movies': 'http://localhost:3000',
         '/sounds': 'http://localhost:3000',
