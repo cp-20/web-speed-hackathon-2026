@@ -42,13 +42,13 @@ test.describe("投稿詳細 - 動画", () => {
 
   test("動画が自動再生され、クリックで一時停止・再生を切り替えられる", async ({ page }) => {
     await page.goto("/");
-    const movieArticle = page.locator("article:has(canvas)").first();
+    const movieArticle = page.locator("article:has(video)").first();
     await expect(movieArticle).toBeVisible({ timeout: 30_000 });
     await movieArticle.locator("time").first().click();
     await page.waitForURL("**/posts/*", { timeout: 10_000 });
 
-    const canvas = page.locator("canvas").first();
-    await expect(canvas).toBeVisible({ timeout: 30_000 });
+    const video = page.locator("video").first();
+    await expect(video).toBeVisible({ timeout: 30_000 });
 
     // VRT: 動画再生中
     await waitForVisibleMedia(page);
@@ -57,7 +57,7 @@ test.describe("投稿詳細 - 動画", () => {
     });
 
     // クリックで一時停止
-    const movieButton = page.locator("button:has(canvas)").first();
+    const movieButton = page.locator("button:has(video)").first();
     await movieButton.click();
 
     // 再度クリックして再生再開
@@ -72,13 +72,15 @@ test.describe("投稿詳細 - 音声", () => {
 
   test("音声の波形が表示され、再生ボタンで切り替えられる", async ({ page }) => {
     await page.goto("/");
-    const soundArticle = page.locator('article:has(svg[viewBox="0 0 100 1"])')
+    const soundArticle = page.locator(
+      'article:has(img[src*="/sounds-waveforms/"])',
+    )
       .first();
     await expect(soundArticle).toBeVisible({ timeout: 30_000 });
     await soundArticle.locator("time").first().click();
     await page.waitForURL("**/posts/*", { timeout: 10_000 });
 
-    const waveform = page.locator('svg[viewBox="0 0 100 1"]').first();
+    const waveform = page.locator('img[src*="/sounds-waveforms/"]').first();
     await expect(waveform).toBeVisible({ timeout: 30_000 });
 
     // VRT: 音声（再生前）
