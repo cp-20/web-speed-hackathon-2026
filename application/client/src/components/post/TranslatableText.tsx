@@ -9,6 +9,27 @@ interface Props {
   text: string;
 }
 
+type Translator = {
+  translate(text: string): Promise<string>;
+};
+
+let translatorPromise: Promise<Translator> | undefined;
+
+function getTranslator(): Promise<Translator> {
+  if (!translatorPromise) {
+    translatorPromise = import(
+      "@web-speed-hackathon-2026/client/src/utils/create_translator"
+    ).then(({ createTranslator }) =>
+      createTranslator({
+        sourceLanguage: "ja",
+        targetLanguage: "en",
+      }),
+    );
+  }
+
+  return translatorPromise;
+}
+
 export const TranslatableText = ({ text }: Props) => {
   const [state, updateState] = useState<State>({ type: "idle", text });
 
@@ -18,13 +39,7 @@ export const TranslatableText = ({ text }: Props) => {
         (async () => {
           updateState({ type: "loading" });
           try {
-            const { createTranslator } = await import(
-              "@web-speed-hackathon-2026/client/src/utils/create_translator"
-            );
-            using translator = await createTranslator({
-              sourceLanguage: "ja",
-              targetLanguage: "en",
-            });
+            const translator = await getTranslator();
             const result = await translator.translate(state.text);
 
             updateState({
@@ -32,7 +47,8 @@ export const TranslatableText = ({ text }: Props) => {
               text: result,
               original: state.text,
             });
-          } catch {
+          } catch (err) {
+            console.error(err);
             updateState({
               type: "translated",
               text: "翻訳に失敗しました",
