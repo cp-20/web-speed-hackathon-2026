@@ -1,3 +1,4 @@
+import { spawn } from "node:child_process";
 import { createWriteStream, promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -63,7 +64,7 @@ const EXISTING_IMAGE_IDS = [
   "f478a152-02f8-46a3-91ce-d1d7944d303a",
 ];
 
-// public/movies/*.gif (15 files)
+// public/movies/*.mp4 (15 files, fallback source is *.gif)
 const EXISTING_MOVIE_IDS = [
   "090e7491-5cdb-4a1b-88b1-1e036a45e296",
   "0c4b66bc-091e-4f76-85a3-288567cfdc12",
@@ -273,6 +274,70 @@ async function ensureWebpImageAssets(): Promise<void> {
       ensureWebpImageAsset(path.resolve(publicDir, `./images/profiles/${id}`))
     ),
   ]);
+}
+
+function runFfmpeg(args: string[]): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const ffmpeg = spawn("ffmpeg", [
+      "-y",
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      ...args,
+    ]);
+    let stderr = "";
+
+    ffmpeg.stderr.on("data", (chunk: Buffer) => {
+      stderr += chunk.toString("utf-8");
+    });
+
+    ffmpeg.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+
+      reject(
+        new Error(stderr.trim() || `ffmpeg exited with code ${String(code)}`),
+      );
+    });
+
+    ffmpeg.on("error", (error) => {
+      reject(error);
+    });
+  });
+}
+
+async function ensureMp4MovieAsset(movieId: string): Promise<void> {
+  const mp4Path = path.resolve(publicDir, `./movies/${movieId}.mp4`);
+  const gifPath = path.resolve(publicDir, `./movies/${movieId}.gif`);
+
+  try {
+    await fs.access(gifPath);
+  } catch {
+    return;
+  }
+
+  await runFfmpeg([
+    "-i",
+    gifPath,
+    "-c:v",
+    "libx264",
+    "-pix_fmt",
+    "yuv420p",
+    "-crf",
+    "36",
+    "-preset",
+    "veryslow",
+    "-movflags",
+    "+faststart",
+    "-an",
+    mp4Path,
+  ]);
+}
+
+async function ensureMp4MovieAssets(): Promise<void> {
+  await Promise.all(EXISTING_MOVIE_IDS.map((id) => ensureMp4MovieAsset(id)));
 }
 
 async function extractImageAlt(
@@ -893,6 +958,9 @@ async function main() {
 
   console.log("0. Converting seed image assets to WebP if needed...");
   await ensureWebpImageAssets();
+
+  console.log("0.5 Converting seed movie assets to MP4...");
+  await ensureMp4MovieAssets();
 
   console.log("1. Generating ProfileImages (using existing assets)...");
   const profileImages = await generateProfileImages();
