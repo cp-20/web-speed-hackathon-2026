@@ -6,6 +6,19 @@ import { parseSearchQuery } from "@web-speed-hackathon-2026/server/src/utils/par
 
 export const searchRouter = Router();
 
+function parseIntegerParam(value: unknown): number | null {
+  if (typeof value !== "string" && typeof value !== "number") {
+    return null;
+  }
+
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed)) {
+    return null;
+  }
+
+  return parsed;
+}
+
 searchRouter.get("/search", async (req, res) => {
   const query = req.query["q"];
 
@@ -21,8 +34,10 @@ searchRouter.get("/search", async (req, res) => {
   }
 
   const searchTerm = keywords ? `%${keywords}%` : null;
-  const limit = req.query["limit"] != null ? Number(req.query["limit"]) : undefined;
-  const offset = req.query["offset"] != null ? Number(req.query["offset"]) : undefined;
+  const limitParam = parseIntegerParam(req.query["limit"]);
+  const offsetParam = parseIntegerParam(req.query["offset"]);
+  const limit = Math.min(Math.max(limitParam ?? 30, 1), 100);
+  const offset = Math.max(offsetParam ?? 0, 0);
 
   // 日付条件を構築
   const dateConditions: Record<symbol, Date>[] = [];
@@ -35,58 +50,32 @@ searchRouter.get("/search", async (req, res) => {
   const dateWhere =
     dateConditions.length > 0 ? { createdAt: Object.assign({}, ...dateConditions) } : {};
 
-  // テキスト検索条件
-  const textWhere = searchTerm ? { text: { [Op.like]: searchTerm } } : {};
-
-  const postsByText = await Post.findAll({
-    limit,
-    offset,
-    where: {
-      ...textWhere,
-      ...dateWhere,
-    },
-  });
-
-  // ユーザー名/名前での検索（キーワードがある場合のみ）
-  let postsByUser: typeof postsByText = [];
+  const whereClauses: object[] = [];
+  if (Object.keys(dateWhere).length > 0) {
+    whereClauses.push(dateWhere);
+  }
   if (searchTerm) {
-    postsByUser = await Post.findAll({
-      include: [
-        {
-          association: "user",
-          attributes: { exclude: ["profileImageId"] },
-          include: [{ association: "profileImage" }],
-          required: true,
-          where: {
-            [Op.or]: [{ username: { [Op.like]: searchTerm } }, { name: { [Op.like]: searchTerm } }],
-          },
-        },
-        {
-          association: "images",
-          through: { attributes: [] },
-        },
-        { association: "movie" },
-        { association: "sound" },
+    whereClauses.push({
+      [Op.or]: [
+        { text: { [Op.like]: searchTerm } },
+        { "$user.username$": { [Op.like]: searchTerm } },
+        { "$user.name$": { [Op.like]: searchTerm } },
       ],
-      limit,
-      offset,
-      where: dateWhere,
     });
   }
 
-  const postIdSet = new Set<string>();
-  const mergedPosts: typeof postsByText = [];
+  const where = whereClauses.length > 0 ? { [Op.and]: whereClauses } : undefined;
 
-  for (const post of [...postsByText, ...postsByUser]) {
-    if (!postIdSet.has(post.id)) {
-      postIdSet.add(post.id);
-      mergedPosts.push(post);
-    }
-  }
-
-  mergedPosts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-
-  const result = mergedPosts.slice(offset || 0, (offset || 0) + (limit || mergedPosts.length));
+  const result = await Post.findAll({
+    limit,
+    offset,
+    order: [
+      ["createdAt", "DESC"],
+      ["id", "DESC"],
+      ["images", "createdAt", "ASC"],
+    ],
+    where,
+  });
 
   return res.status(200).type("application/json").send(result);
 });
