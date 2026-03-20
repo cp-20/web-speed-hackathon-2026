@@ -16,6 +16,12 @@ import {
   renderAppSsr,
   type SsrFallback,
 } from "@web-speed-hackathon-2026/server/src/routes/ssr";
+import {
+  buildSsrCacheKey,
+  getCachedSsrHtml,
+  getSsrCacheTags,
+  setCachedSsrHtml,
+} from "@web-speed-hackathon-2026/server/src/routes/ssr_cache";
 
 export const staticRouter = Router();
 
@@ -197,9 +203,19 @@ staticRouter.use(async (req: Request, res: Response, next) => {
     return next();
   }
 
+  const location = req.originalUrl || req.url;
+  const activeUser = (req as any).user ?? null;
+  const activeUserId = activeUser?.id ?? null;
+  const cacheKey = buildSsrCacheKey({ location, activeUserId });
+
+  const cachedHtml = getCachedSsrHtml(cacheKey);
+  if (cachedHtml != null) {
+    res.setHeader("X-SSR-Cache", "HIT");
+    return res.status(200).type("text/html").send(cachedHtml);
+  }
+
   try {
     const indexHtml = await readClientIndexHtml();
-    const activeUser = (req as any).user ?? null;
     const swrFallback = await buildSsrFallback(req, activeUser);
 
     const appHtml = renderAppSsr({
@@ -214,6 +230,14 @@ staticRouter.use(async (req: Request, res: Response, next) => {
     </script>`;
 
     const html = replaceAppRoot(indexHtml, appHtml, swrCacheScript);
+
+    setCachedSsrHtml({
+      cacheKey,
+      html,
+      tags: getSsrCacheTags({ location, activeUserId }),
+    });
+
+    res.setHeader("X-SSR-Cache", "MISS");
 
     res.status(200).type("text/html").send(html);
   } catch (err) {

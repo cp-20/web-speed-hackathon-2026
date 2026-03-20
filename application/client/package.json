@@ -5,7 +5,7 @@
   "license": "MPL-2.0",
   "author": "CyberAgent, Inc.",
   "scripts": {
-    "build": "vite build",
+    "build": "NODE_ENV=production vite build",
     "dev": "vite --host 0.0.0.0 --port 8080",
     "analyze": "ANALYZE=true vite build",
     "typecheck": "tsc",
