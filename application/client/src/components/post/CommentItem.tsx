@@ -1,14 +1,16 @@
-import moment from "moment";
-
 import { Link } from "@web-speed-hackathon-2026/client/src/components/foundation/Link";
 import { TranslatableText } from "@web-speed-hackathon-2026/client/src/components/post/TranslatableText";
 import { getProfileImagePath } from "@web-speed-hackathon-2026/client/src/utils/get_path";
+import { formatJaLongDate, toIsoDateTime } from "@web-speed-hackathon-2026/client/src/utils/temporal";
 
 interface Props {
   comment: Models.Comment;
 }
 
 export const CommentItem = ({ comment }: Props) => {
+  const createdAtIso = toIsoDateTime(comment.createdAt);
+  const createdAtLabel = formatJaLongDate(comment.createdAt);
+
   return (
     <article className="hover:bg-cax-surface-subtle px-1 sm:px-4">
       <div className="border-cax-border flex border-b px-2 pt-2 pb-4 sm:px-4">
@@ -42,8 +44,8 @@ export const CommentItem = ({ comment }: Props) => {
             <TranslatableText text={comment.text} />
           </div>
           <p className="text-cax-text-muted pt-1 text-xs">
-            <time dateTime={moment(comment.createdAt).toISOString()}>
-              {moment(comment.createdAt).locale("ja").format("LL")}
+            <time dateTime={createdAtIso}>
+              {createdAtLabel}
             </time>
           </p>
         </div>
