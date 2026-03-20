@@ -38,7 +38,7 @@ imageRouter.post("/images", async (req, res) => {
   const alt = typeof altRaw === "string" ? altRaw : "";
 
   const convertedImage = await sharp(req.body)
-    .resize({ width: 800, fit: "cover" }).webp({ quality: 85 })
+    .resize({ width: 600, fit: "cover" }).webp({ quality: 85 })
     .withMetadata().toBuffer();
 
   const imageId = uuidv4();

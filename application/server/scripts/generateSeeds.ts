@@ -259,7 +259,7 @@ async function ensureWebpImageAsset(
   },
 ): Promise<void> {
   const {
-    width = 800,
+    width = 600,
     height,
     fit = "cover",
     quality = 85,
@@ -281,7 +281,7 @@ async function ensureWebpImageAssets(): Promise<void> {
       ensureWebpImageAsset(path.resolve(publicDir, `./images/${id}`), {
         fit: "cover",
         quality: 85,
-        width: 800,
+        width: 600,
       })
     ),
     ...EXISTING_PROFILE_IMAGE_IDS.map((id) =>
@@ -340,10 +340,10 @@ async function ensureMp4MovieAsset(movieId: string): Promise<void> {
   await runFfmpeg([
     "-i",
     gifPath,
+    "-vf",
+    "crop='min(iw,ih)':'min(iw,ih)',scale=600:600,format=yuv420p",
     "-c:v",
     "libx264",
-    "-pix_fmt",
-    "yuv420p",
     "-crf",
     "36",
     "-preset",

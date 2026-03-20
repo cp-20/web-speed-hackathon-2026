@@ -62,7 +62,7 @@ export async function convertMovieToMp4(data: Buffer): Promise<Buffer> {
       "-r",
       "10",
       "-vf",
-      "crop='min(iw,ih)':'min(iw,ih)',format=yuv420p",
+      "crop='min(iw,ih)':'min(iw,ih)',scale=600:600,format=yuv420p",
       "-c:v",
       "libx264",
       "-crf",
