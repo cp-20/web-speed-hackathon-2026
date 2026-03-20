@@ -14,8 +14,8 @@ export const sanitizeSearchText = (input: string): string => {
 };
 
 export const parseSearchQuery = (query: string) => {
-  const sincePattern = /since:((\d|\d\d|\d\d\d\d-\d\d-\d\d)+)+$/;
-  const untilPattern = /until:((\d|\d\d|\d\d\d\d-\d\d-\d\d)+)+$/;
+  const sincePattern = /since:((\d|\d\d|\d\d\d\d-\d\d-\d\d)+)$/;
+  const untilPattern = /until:((\d|\d\d|\d\d\d\d-\d\d-\d\d)+)$/;
 
   const sincePart = query.match(/since:[^\s]*/)?.[0] || "";
   const untilPart = query.match(/until:[^\s]*/)?.[0] || "";
