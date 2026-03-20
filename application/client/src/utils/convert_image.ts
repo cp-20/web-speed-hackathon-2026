@@ -3,7 +3,7 @@ import {
   initializeImageMagick,
   MagickFormat,
 } from "@imagemagick/magick-wasm";
-import magickWasm from "@imagemagick/magick-wasm/magick.wasm?binary";
+import magickWasmUrl from "@imagemagick/magick-wasm/magick.wasm?url";
 import { dump, ImageIFD, insert } from "piexifjs";
 
 interface Options {
@@ -19,7 +19,10 @@ export async function convertImage(
   file: File,
   options: Options,
 ): Promise<ConvertedImage> {
-  await initializeImageMagick(magickWasm);
+  const magickWasm = await fetch(magickWasmUrl).then((res) =>
+    res.arrayBuffer()
+  );
+  await initializeImageMagick(new Uint8Array(magickWasm));
 
   const byteArray = new Uint8Array(await file.arrayBuffer());
 
