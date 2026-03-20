@@ -1,9 +1,7 @@
-import { ReactEventHandler, useCallback, useMemo, useRef, useState } from "react";
+import { ReactEventHandler, useCallback, useRef, useState } from "react";
 
 import { FontAwesomeIcon } from "@web-speed-hackathon-2026/client/src/components/foundation/FontAwesomeIcon";
 import { SoundWaveSVG } from "@web-speed-hackathon-2026/client/src/components/foundation/SoundWaveSVG";
-import { useFetch } from "@web-speed-hackathon-2026/client/src/hooks/use_fetch";
-import { fetchBinary } from "@web-speed-hackathon-2026/client/src/utils/fetchers";
 import { getSoundPath } from "@web-speed-hackathon-2026/client/src/utils/get_path";
 
 interface Props {
@@ -12,12 +10,6 @@ interface Props {
 }
 
 export const SoundPlayer = ({ sound, prioritizeMedia = false }: Props) => {
-  const { data, isLoading } = useFetch(getSoundPath(sound.id), fetchBinary);
-
-  const blobUrl = useMemo(() => {
-    return data !== null ? URL.createObjectURL(new Blob([data])) : null;
-  }, [data]);
-
   const [currentTimeRatio, setCurrentTimeRatio] = useState(0);
   const handleTimeUpdate = useCallback<ReactEventHandler<HTMLAudioElement>>((ev) => {
     const el = ev.currentTarget;
@@ -37,10 +29,6 @@ export const SoundPlayer = ({ sound, prioritizeMedia = false }: Props) => {
     });
   }, []);
 
-  if (isLoading || data === null || blobUrl === null) {
-    return null;
-  }
-
   return (
     <div className="bg-cax-surface-subtle flex h-full w-full items-center justify-center">
       <audio
@@ -48,7 +36,7 @@ export const SoundPlayer = ({ sound, prioritizeMedia = false }: Props) => {
         loop={true}
         onTimeUpdate={handleTimeUpdate}
         preload={prioritizeMedia ? "auto" : "metadata"}
-        src={blobUrl}
+        src={getSoundPath(sound.id)}
       />
       <div className="p-2">
         <button
