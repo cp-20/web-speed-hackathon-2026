@@ -88,33 +88,48 @@ export const ChatInput = ({ isStreaming, onSendMessage }: Props) => {
   useEffect(() => {
     let cancelled = false;
 
+    if (!inputValue.trim()) {
+      setSuggestions([]);
+      setQueryTokens([]);
+      setShowSuggestions(false);
+
+      return () => {
+        cancelled = true;
+      };
+    }
+
     const updateSuggestions = async () => {
-      if (!inputValue.trim()) {
+      try {
+        const { suggestions: nextSuggestions, queryTokens: nextQueryTokens } = await fetchJSON<{
+          suggestions: string[];
+          queryTokens: string[];
+        }>(
+          `/api/v1/crok/suggestions?q=${encodeURIComponent(inputValue)}`,
+        );
+        if (cancelled) {
+          return;
+        }
+
+        setQueryTokens(nextQueryTokens);
+        setSuggestions(nextSuggestions);
+        setShowSuggestions(nextSuggestions.length > 0);
+      } catch {
+        if (cancelled) {
+          return;
+        }
         setSuggestions([]);
         setQueryTokens([]);
         setShowSuggestions(false);
-        return;
       }
-
-      const { suggestions: nextSuggestions, queryTokens: nextQueryTokens } = await fetchJSON<{
-        suggestions: string[];
-        queryTokens: string[];
-      }>(
-        `/api/v1/crok/suggestions?q=${encodeURIComponent(inputValue)}`,
-      );
-      if (cancelled) {
-        return;
-      }
-
-      setQueryTokens(nextQueryTokens);
-      setSuggestions(nextSuggestions);
-      setShowSuggestions(nextSuggestions.length > 0);
     };
 
-    void updateSuggestions();
+    const debounceTimer = window.setTimeout(() => {
+      void updateSuggestions();
+    }, 250);
 
     return () => {
       cancelled = true;
+      window.clearTimeout(debounceTimer);
     };
   }, [inputValue]);
 
