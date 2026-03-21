@@ -1,4 +1,4 @@
-import { MouseEvent, useCallback, useId } from "react";
+import { MouseEvent, useCallback, useEffect, useId, useState } from "react";
 
 import { Button } from "@web-speed-hackathon-2026/client/src/components/foundation/Button";
 import { Modal } from "@web-speed-hackathon-2026/client/src/components/modal/Modal";
@@ -24,6 +24,7 @@ export const CoveredImage = ({
   fetchPriority = "auto",
 }: Props) => {
   const dialogId = useId();
+  const [renderDialog, setRenderDialog] = useState(false);
   // ダイアログの背景をクリックしたときに投稿詳細ページに遷移しないようにする
   const handleDialogClick = useCallback((ev: MouseEvent<HTMLDialogElement>) => {
     ev.stopPropagation();
@@ -32,6 +33,10 @@ export const CoveredImage = ({
   if (height <= 0 || width <= 0) {
     return null;
   }
+
+  useEffect(() => {
+    setRenderDialog(true);
+  }, [])
 
   return (
     <div className="relative h-full w-full overflow-hidden">
@@ -50,21 +55,23 @@ export const CoveredImage = ({
         type="button"
         command="show-modal"
         commandfor={dialogId}
+        disabled={!renderDialog}
       >
         ALT を表示する
       </button>
 
-      <Modal id={dialogId} closedby="any" onClick={handleDialogClick}>
-        <div className="grid gap-y-6">
-          <h1 className="text-center text-2xl font-bold">画像の説明</h1>
+      {renderDialog && (
+        <Modal id={dialogId} closedby="any" onClick={handleDialogClick}>
+          <div className="grid gap-y-6">
+            <h1 className="text-center text-2xl font-bold">画像の説明</h1>
 
-          <p className="text-sm">{alt}</p>
+            <p className="text-sm">{alt}</p>
 
-          <Button variant="secondary" command="close" commandfor={dialogId}>
-            閉じる
-          </Button>
-        </div>
-      </Modal>
+            <Button variant="secondary" command="close" commandfor={dialogId}>
+              閉じる
+            </Button>
+          </div>
+        </Modal>)}
     </div>
   );
 };
