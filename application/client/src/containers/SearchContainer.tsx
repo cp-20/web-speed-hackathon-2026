@@ -1,5 +1,5 @@
 import { Helmet } from "@web-speed-hackathon-2026/client/src/components/Helmet";
-import { useLocation } from "react-router";
+import { useSearch } from "wouter";
 
 import { SearchPage } from "@web-speed-hackathon-2026/client/src/components/application/SearchPage";
 import { InfiniteScroll } from "@web-speed-hackathon-2026/client/src/components/foundation/InfiniteScroll";
@@ -7,7 +7,7 @@ import { useInfiniteFetch } from "@web-speed-hackathon-2026/client/src/hooks/use
 import { fetchJSON } from "@web-speed-hackathon-2026/client/src/utils/fetchers";
 
 export const SearchContainer = () => {
-  const { search } = useLocation();
+  const search = useSearch();
   const searchParams = new URLSearchParams(search);
   const query = searchParams.get("q") || "";
 

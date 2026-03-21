@@ -1,5 +1,5 @@
 import { MouseEventHandler, useCallback } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation } from "wouter";
 
 import { ImageArea } from "@web-speed-hackathon-2026/client/src/components/post/ImageArea";
 import { MovieArea } from "@web-speed-hackathon-2026/client/src/components/post/MovieArea";
@@ -33,7 +33,7 @@ interface Props {
 }
 
 export const TimelineItem = ({ post, prioritizeMedia = false }: Props) => {
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
   const createdAtIso = toIsoDateTime(post.createdAt);
   const createdAtLabel = formatJaLongDate(post.createdAt);
 

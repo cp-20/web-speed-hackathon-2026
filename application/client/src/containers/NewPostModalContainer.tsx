@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation } from "wouter";
 
 import { Modal } from "@web-speed-hackathon-2026/client/src/components/modal/Modal";
 import { NewPostModalPage } from "@web-speed-hackathon-2026/client/src/components/new_post_modal/NewPostModalPage";
@@ -56,7 +56,7 @@ export const NewPostModalContainer = ({ id }: Props) => {
     };
   }, []);
 
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
 
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

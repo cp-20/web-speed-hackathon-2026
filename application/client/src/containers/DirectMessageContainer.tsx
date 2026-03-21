@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Helmet } from "@web-speed-hackathon-2026/client/src/components/Helmet";
-import { useParams } from "react-router";
+import { useParams } from "wouter";
 import { useSWRConfig } from "swr";
 
 import { DirectMessageGate } from "@web-speed-hackathon-2026/client/src/components/direct_message/DirectMessageGate";

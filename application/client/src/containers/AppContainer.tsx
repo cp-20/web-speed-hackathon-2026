@@ -1,6 +1,6 @@
 import { Suspense, lazy, useCallback, useEffect } from "react";
 import { Helmet } from "@web-speed-hackathon-2026/client/src/components/Helmet";
-import { Route, Routes, useLocation, useNavigate } from "react-router";
+import { Route, Switch, useLocation } from "wouter";
 import { useSWRConfig } from "swr";
 
 import { AppPage } from "@web-speed-hackathon-2026/client/src/components/application/AppPage";
@@ -49,32 +49,25 @@ export const AppContainerContent = ({
         newPostModalId={newPostModalId}
         onLogout={onLogout}
       >
-        <Routes>
-          <Route element={<TimelineContainer />} path="/" />
-          <Route
-            element={
-              <DirectMessageListContainer activeUser={activeUser} authModalId={authModalId} />
-            }
-            path="/dm"
-          />
-          <Route
-            element={<DirectMessageContainer activeUser={activeUser} authModalId={authModalId} />}
-            path="/dm/:conversationId"
-          />
-          <Route element={<SearchContainer />} path="/search" />
-          <Route element={<UserProfileContainer />} path="/users/:username" />
-          <Route element={<PostContainer />} path="/posts/:postId" />
-          <Route element={<TermContainer />} path="/terms" />
-          <Route
-            element={
-              <Suspense fallback={null}>
-                <CrokContainer activeUser={activeUser} authModalId={authModalId} />
-              </Suspense>
-            }
-            path="/crok"
-          />
-          <Route element={<NotFoundContainer />} path="*" />
-        </Routes>
+        <Switch>
+          <Route path="/" component={TimelineContainer} />
+          <Route path="/dm">
+            <DirectMessageListContainer activeUser={activeUser} authModalId={authModalId} />
+          </Route>
+          <Route path="/dm/:conversationId">
+            <DirectMessageContainer activeUser={activeUser} authModalId={authModalId} />
+          </Route>
+          <Route path="/search" component={SearchContainer} />
+          <Route path="/users/:username" component={UserProfileContainer} />
+          <Route path="/posts/:postId" component={PostContainer} />
+          <Route path="/terms" component={TermContainer} />
+          <Route path="/crok">
+            <Suspense fallback={null}>
+              <CrokContainer activeUser={activeUser} authModalId={authModalId} />
+            </Suspense>
+          </Route>
+          <Route component={NotFoundContainer} />
+        </Switch>
       </AppPage>
 
       <AuthModalContainer id={authModalId} onUpdateActiveUser={onUpdateActiveUser} />
@@ -84,8 +77,7 @@ export const AppContainerContent = ({
 };
 
 export const AppContainer = () => {
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
+  const [pathname, navigate] = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);

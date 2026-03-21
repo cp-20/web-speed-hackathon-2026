@@ -1,8 +1,8 @@
 import { AnchorHTMLAttributes, forwardRef } from "react";
-import { To, Link as RouterLink } from "react-router";
+import { Link as RouterLink } from "wouter";
 
 type Props = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
-  to: To;
+  to: string;
 };
 
 export const Link = forwardRef<HTMLAnchorElement, Props>((props, ref) => {

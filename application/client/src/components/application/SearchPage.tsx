@@ -1,5 +1,5 @@
 import { FormEventHandler, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation } from "wouter";
 
 import { Timeline } from "@web-speed-hackathon-2026/client/src/components/timeline/Timeline";
 import {
@@ -48,7 +48,7 @@ export const SearchPage = ({
   results,
   initialValues,
 }: Props) => {
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
   const [isNegative, setIsNegative] = useState(false);
   const [searchText, setSearchText] = useState(initialValues?.searchText ?? query);
   const [touched, setTouched] = useState(false);

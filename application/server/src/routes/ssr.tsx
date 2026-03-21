@@ -1,5 +1,5 @@
 import { renderToString } from "react-dom/server";
-import { MemoryRouter, StaticRouter } from "react-router";
+import { Router } from "wouter";
 import { SWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
 import type { SWRInfiniteKeyLoader } from "swr/infinite";
@@ -63,9 +63,11 @@ export function renderAppSsr(params: {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   const handleUpdateActiveUser = () => { };
 
+  const url = new URL(location, "http://localhost");
+
   return renderToString(
     <SWRConfig value={{ fallback: swrFallback }}>
-      <StaticRouter location={location}>
+      <Router ssrPath={url.pathname} ssrSearch={url.search}>
         <AppContainerSsrContent
           activeUser={activeUser}
           authModalId="auth-modal"
@@ -73,7 +75,7 @@ export function renderAppSsr(params: {
           onLogout={handleLogout}
           onUpdateActiveUser={handleUpdateActiveUser}
         />
-      </StaticRouter>
+      </Router>
     </SWRConfig>,
   );
 }
@@ -96,7 +98,7 @@ export function renderPostPageSsr(params: {
   const handleLogout = () => { };
 
   return renderToString(
-    <MemoryRouter initialEntries={[location]}>
+    <Router ssrPath={location}>
       <AppPage
         activeUser={activeUser}
         authModalId="auth-modal"
@@ -105,6 +107,6 @@ export function renderPostPageSsr(params: {
       >
         <PostPage comments={comments} post={post} />
       </AppPage>
-    </MemoryRouter>,
+    </Router>,
   );
 }

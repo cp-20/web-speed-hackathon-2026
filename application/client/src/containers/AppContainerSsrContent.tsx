@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router";
+import { Route, Switch } from "wouter";
 
 import { AppPage } from "@web-speed-hackathon-2026/client/src/components/application/AppPage";
 import { AuthModalContainer } from "@web-speed-hackathon-2026/client/src/containers/AuthModalContainer";
@@ -37,23 +37,21 @@ export const AppContainerSsrContent = ({
         newPostModalId={newPostModalId}
         onLogout={onLogout}
       >
-        <Routes>
-          <Route element={<TimelineContainer />} path="/" />
-          <Route
-            element={<DirectMessageListContainer activeUser={activeUser} authModalId={authModalId} />}
-            path="/dm"
-          />
-          <Route
-            element={<DirectMessageContainer activeUser={activeUser} authModalId={authModalId} />}
-            path="/dm/:conversationId"
-          />
-          <Route element={<SearchContainer />} path="/search" />
-          <Route element={<UserProfileContainer />} path="/users/:username" />
-          <Route element={<PostContainer />} path="/posts/:postId" />
-          <Route element={<TermContainer />} path="/terms" />
-          <Route element={<CrokSsrPlaceholder />} path="/crok" />
-          <Route element={<NotFoundContainer />} path="*" />
-        </Routes>
+        <Switch>
+          <Route path="/" component={TimelineContainer} />
+          <Route path="/dm">
+            <DirectMessageListContainer activeUser={activeUser} authModalId={authModalId} />
+          </Route>
+          <Route path="/dm/:conversationId">
+            <DirectMessageContainer activeUser={activeUser} authModalId={authModalId} />
+          </Route>
+          <Route path="/search" component={SearchContainer} />
+          <Route path="/users/:username" component={UserProfileContainer} />
+          <Route path="/posts/:postId" component={PostContainer} />
+          <Route path="/terms" component={TermContainer} />
+          <Route path="/crok" component={CrokSsrPlaceholder} />
+          <Route component={NotFoundContainer} />
+        </Switch>
       </AppPage>
 
       <AuthModalContainer id={authModalId} onUpdateActiveUser={onUpdateActiveUser} />

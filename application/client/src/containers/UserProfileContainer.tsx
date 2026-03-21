@@ -1,5 +1,5 @@
 import { Helmet } from "@web-speed-hackathon-2026/client/src/components/Helmet";
-import { useParams } from "react-router";
+import { useParams } from "wouter";
 
 import { InfiniteScroll } from "@web-speed-hackathon-2026/client/src/components/foundation/InfiniteScroll";
 import { UserProfilePage } from "@web-speed-hackathon-2026/client/src/components/user_profile/UserProfilePage";
