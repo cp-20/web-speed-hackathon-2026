@@ -113,7 +113,7 @@ export const DirectMessagePage = ({
 
   return (
     <section className="bg-cax-surface flex min-h-[calc(100vh-(--spacing(12)))] flex-col lg:min-h-screen">
-      <header className="border-cax-border bg-cax-surface sticky top-0 z-10 flex items-center gap-2 border-b px-4 py-3">
+      <header className="border-cax-border bg-cax-surface fixed w-[min(40rem,100vw)] top-0 z-10 flex items-center gap-2 border-b px-4 py-3">
         <img
           alt={peer.profileImage.alt}
           className="h-12 w-12 rounded-full object-cover"
@@ -178,7 +178,7 @@ export const DirectMessagePage = ({
         </ul>
       </div>
 
-      <div className="sticky bottom-12 z-10 lg:bottom-0">
+      <div className="fixed w-[min(40rem,100vw)] bottom-12 z-10 lg:bottom-0">
         {isPeerTyping && (
           <p className="bg-cax-surface-raised/75 text-cax-brand absolute inset-x-0 top-0 -translate-y-full px-4 py-1 text-xs">
             <span className="font-bold">{peer.name}</span>さんが入力中…
