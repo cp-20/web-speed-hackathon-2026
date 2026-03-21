@@ -19,7 +19,7 @@ export const DirectMessageListPage = ({ activeUser, newDmModalId }: Props) => {
   const { mutate } = useSWRConfig();
 
   const {
-    data,
+    data: conversations,
     error,
     isLoading,
   } = useFetch<Array<Models.DirectMessageConversation>>(
@@ -31,15 +31,9 @@ export const DirectMessageListPage = ({ activeUser, newDmModalId }: Props) => {
     void mutate(dmListApiPath);
   });
 
-  if (isLoading || data == null) {
+  if (isLoading || conversations == null) {
     return null;
   }
-
-  const conversations = data.toSorted((a, b) => {
-    const aLastMessage = a.messages.at(-1)!;
-    const bLastMessage = b.messages.at(-1)!;
-    return new Date(bLastMessage.createdAt).getTime() - new Date(aLastMessage.createdAt).getTime();
-  });
 
   return (
     <section>
@@ -72,7 +66,6 @@ export const DirectMessageListPage = ({ activeUser, newDmModalId }: Props) => {
                 : conversation.member;
 
             const lastMessage = messages.at(-1);
-            const hasUnread = conversation.hasUnread === true;
 
             return (
               <li className="grid" key={conversation.id}>
@@ -102,7 +95,7 @@ export const DirectMessageListPage = ({ activeUser, newDmModalId }: Props) => {
                         )}
                       </div>
                       <p className="mt-1 line-clamp-2 text-sm wrap-anywhere">{lastMessage?.body}</p>
-                      {hasUnread ? (
+                      {conversation.hasUnread ? (
                         <span className="bg-cax-brand-soft text-cax-brand mt-2 inline-flex w-fit rounded-full px-3 py-0.5 text-xs">
                           未読
                         </span>

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import httpErrors from "http-errors";
-import { literal, Op } from "sequelize";
+import { Op } from "sequelize";
 
 import { eventhub } from "@web-speed-hackathon-2026/server/src/eventhub";
 import {
@@ -52,16 +52,9 @@ directMessageRouter.get("/dm", async (req, res) => {
 
   const conversations = await DirectMessageConversation.unscoped().findAll({
     where: {
-      [Op.and]: [
-        {
-          [Op.or]: [{ initiatorId: req.session.userId }, {
-            memberId: req.session.userId,
-          }],
-        },
-        literal(
-          `EXISTS (SELECT 1 FROM "DirectMessages" WHERE "DirectMessages"."conversationId" = "DirectMessageConversation"."id")`,
-        ),
-      ],
+      [Op.or]: [{ initiatorId: req.session.userId }, {
+        memberId: req.session.userId,
+      }],
     },
     include: [
       {
@@ -72,49 +65,65 @@ directMessageRouter.get("/dm", async (req, res) => {
         association: "member",
         include: [{ association: "profileImage" }],
       },
-      {
-        association: "messages",
-        attributes: ["body", "isRead", "createdAt", "senderId"],
-        order: [["createdAt", "DESC"]],
-        limit: 1,
-        separate: true,
-        required: false,
+    ],
+  });
+
+  const conversationIds = conversations.map((conversation) => conversation.id);
+  const latestMessages = conversationIds.length === 0
+    ? []
+    : await DirectMessage.unscoped().findAll({
+      attributes: ["conversationId", "body", "isRead", "createdAt", "senderId"],
+      where: {
+        conversationId: { [Op.in]: conversationIds },
       },
-    ],
-    order: [
-      [
-        literal(
-          '(SELECT MAX("createdAt") FROM "DirectMessages" WHERE "DirectMessages"."conversationId" = "DirectMessageConversation"."id")',
-        ),
-        "DESC",
-      ],
-    ],
-  });
+      order: [["createdAt", "DESC"], ["id", "DESC"]],
+    });
 
-  const responseConversations = conversations.map((conversation) => {
-    const json = conversation.toJSON() as {
-      messages?: Array<{
-        senderId?: string;
-        body: string;
-        isRead: boolean;
-        createdAt: string;
-      }>;
-    } & Record<string, unknown>;
-    const lastMessage = json.messages?.[0];
-    const hasUnread = lastMessage != null &&
-      lastMessage.senderId !== req.session.userId &&
-      lastMessage.isRead === false;
+  const latestMessageByConversationId = new Map<string, DirectMessage>();
+  for (const message of latestMessages) {
+    if (!latestMessageByConversationId.has(message.conversationId)) {
+      latestMessageByConversationId.set(message.conversationId, message);
+    }
+  }
 
-    return {
-      ...json,
-      hasUnread,
-      messages: (json.messages ?? []).map((message) => ({
-        body: message.body,
-        isRead: message.isRead,
-        createdAt: message.createdAt,
-      })),
-    };
-  });
+  const responseConversations = conversations
+    .toSorted((a, b) => {
+      const aLastMessage = latestMessageByConversationId.get(a.id);
+      const bLastMessage = latestMessageByConversationId.get(b.id);
+
+      if (aLastMessage == null && bLastMessage == null) {
+        return 0;
+      }
+      if (aLastMessage == null) {
+        return 1;
+      }
+      if (bLastMessage == null) {
+        return -1;
+      }
+      return new Date(bLastMessage.createdAt).getTime() -
+        new Date(aLastMessage.createdAt).getTime();
+    })
+    .flatMap((conversation) => {
+      const json = conversation.toJSON() as {} & Record<string, unknown>;
+
+      const lastMessage = latestMessageByConversationId.get(conversation.id);
+      if (lastMessage === undefined) {
+        return [];
+      }
+
+      const hasUnread = lastMessage.senderId !== req.session.userId &&
+        lastMessage.isRead === false;
+
+      return {
+        ...json,
+        hasUnread,
+        messages: [{
+          body: lastMessage.body,
+          isRead: lastMessage.isRead,
+          createdAt: lastMessage.createdAt,
+        }],
+      };
+    });
 
   return res.status(200).type("application/json").send(responseConversations);
 });
