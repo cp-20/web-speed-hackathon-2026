@@ -1,11 +1,10 @@
-import { useCallback, useEffect } from "react";
+import { Suspense, lazy, useCallback, useEffect } from "react";
 import { Helmet } from "react-helmet";
 import { Route, Routes, useLocation, useNavigate } from "react-router";
 import { useSWRConfig } from "swr";
 
 import { AppPage } from "@web-speed-hackathon-2026/client/src/components/application/AppPage";
 import { AuthModalContainer } from "@web-speed-hackathon-2026/client/src/containers/AuthModalContainer";
-import { CrokContainer } from "@web-speed-hackathon-2026/client/src/containers/CrokContainer";
 import { DirectMessageContainer } from "@web-speed-hackathon-2026/client/src/containers/DirectMessageContainer";
 import { DirectMessageListContainer } from "@web-speed-hackathon-2026/client/src/containers/DirectMessageListContainer";
 import { NewPostModalContainer } from "@web-speed-hackathon-2026/client/src/containers/NewPostModalContainer";
@@ -17,6 +16,11 @@ import { TimelineContainer } from "@web-speed-hackathon-2026/client/src/containe
 import { UserProfileContainer } from "@web-speed-hackathon-2026/client/src/containers/UserProfileContainer";
 import { useFetch } from "@web-speed-hackathon-2026/client/src/hooks/use_fetch";
 import { fetchJSON, sendJSON } from "@web-speed-hackathon-2026/client/src/utils/fetchers";
+
+const CrokContainer = lazy(async () => {
+  const module = await import("@web-speed-hackathon-2026/client/src/containers/CrokContainer");
+  return { default: module.CrokContainer };
+});
 
 /**
  * SSR-safe なコンポーネント（副作用なし）
@@ -62,7 +66,11 @@ export const AppContainerContent = ({
           <Route element={<PostContainer />} path="/posts/:postId" />
           <Route element={<TermContainer />} path="/terms" />
           <Route
-            element={<CrokContainer activeUser={activeUser} authModalId={authModalId} />}
+            element={
+              <Suspense fallback={null}>
+                <CrokContainer activeUser={activeUser} authModalId={authModalId} />
+              </Suspense>
+            }
             path="/crok"
           />
           <Route element={<NotFoundContainer />} path="*" />
