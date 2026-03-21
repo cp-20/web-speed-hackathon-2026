@@ -244,7 +244,7 @@ staticRouter.use(async (req: Request, res: Response, next) => {
   const activeUserId = activeUser?.id ?? req.session.userId ?? null;
   const cacheKey = buildSsrCacheKey({ location, activeUserId });
 
-  const cachedHtml = isDmRoute ? null : getCachedSsrHtml(cacheKey);
+  const cachedHtml = getCachedSsrHtml(cacheKey);
   if (cachedHtml != null) {
     res.setHeader("X-SSR-Cache", "HIT");
     return res.status(200).type("text/html").send(cachedHtml);
@@ -267,15 +267,13 @@ staticRouter.use(async (req: Request, res: Response, next) => {
 
     const html = replaceAppRoot(indexHtml, appHtml, swrCacheScript);
 
-    if (!isDmRoute) {
-      setCachedSsrHtml({
-        cacheKey,
-        html,
-        tags: getSsrCacheTags({ location, activeUserId }),
-      });
-    }
+    setCachedSsrHtml({
+      cacheKey,
+      html,
+      tags: getSsrCacheTags({ location, activeUserId }),
+    });
 
-    res.setHeader("X-SSR-Cache", isDmRoute ? "BYPASS" : "MISS");
+    res.setHeader("X-SSR-Cache", "MISS");
 
     res.status(200).type("text/html").send(html);
   } catch (err) {
