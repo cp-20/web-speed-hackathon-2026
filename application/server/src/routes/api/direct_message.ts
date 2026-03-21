@@ -193,8 +193,10 @@ directMessageRouter.get("/dm/:conversationId", async (req, res) => {
         association: "messages",
         attributes: ["id", "body", "isRead", "createdAt"],
         include: [{
+          model: User.unscoped(),
           association: "sender",
           attributes: ["id"],
+          include: [{ association: "profileImage", attributes: [] }],
         }],
         order: [["createdAt", "ASC"]],
         required: false,
