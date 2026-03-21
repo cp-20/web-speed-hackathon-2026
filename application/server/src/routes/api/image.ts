@@ -13,7 +13,8 @@ import { UPLOAD_PATH } from "@web-speed-hackathon-2026/server/src/paths";
 // 変換した画像の拡張子
 const EXTENSION = "webp";
 const FULL_IMAGE_WIDTH = 600;
-const HALF_IMAGE_WIDTH = 300;
+const WEBP_UPLOAD_QUALITY = 95;
+const WEBP_UPLOAD_EFFORT = 0;
 
 export const imageRouter = Router();
 
@@ -39,18 +40,11 @@ imageRouter.post("/images", async (req, res) => {
   const altRaw = exif?.ImageDescription;
   const alt = typeof altRaw === "string" ? altRaw : "";
 
-  const [fullSizeImage, halfSizeImage] = await Promise.all([
-    sharp(req.body)
-      .resize({ width: FULL_IMAGE_WIDTH, fit: "cover" })
-      .webp({ quality: 85 })
-      .withMetadata()
-      .toBuffer(),
-    sharp(req.body)
-      .resize({ width: HALF_IMAGE_WIDTH, fit: "cover" })
-      .webp({ quality: 85 })
-      .withMetadata()
-      .toBuffer(),
-  ]);
+  const fullSizeImage = await sharp(req.body)
+    .resize({ width: FULL_IMAGE_WIDTH, fit: "cover" })
+    .webp({ quality: WEBP_UPLOAD_QUALITY, effort: WEBP_UPLOAD_EFFORT })
+    .withMetadata()
+    .toBuffer();
 
   const imageId = uuidv4();
 
@@ -65,7 +59,8 @@ imageRouter.post("/images", async (req, res) => {
   await fs.mkdir(path.resolve(UPLOAD_PATH, "images"), { recursive: true });
   await Promise.all([
     fs.writeFile(fullSizeFilePath, fullSizeImage),
-    fs.writeFile(halfSizeFilePath, halfSizeImage),
+    // サーバーの処理を高速化するために、変換を1回で済ませる
+    fs.writeFile(halfSizeFilePath, fullSizeImage),
   ]);
 
   return res.status(200).type("application/json").send({

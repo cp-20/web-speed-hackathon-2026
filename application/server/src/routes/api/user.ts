@@ -18,6 +18,8 @@ import { UPLOAD_PATH } from "@web-speed-hackathon-2026/server/src/paths";
 export const userRouter = Router();
 
 const PROFILE_IMAGE_EXTENSION = "webp";
+const WEBP_UPLOAD_QUALITY = 95;
+const WEBP_UPLOAD_EFFORT = 0;
 
 async function getAverageColorRgb(imageBuffer: Buffer): Promise<string> {
   const stats = await sharp(imageBuffer).stats();
@@ -85,7 +87,7 @@ userRouter.post("/me/profile-image", async (req, res) => {
 
   const convertedImage = await sharp(req.body)
     .resize({ fit: "cover", height: 128, width: 128 })
-    .webp({ quality: 70 })
+    .webp({ quality: WEBP_UPLOAD_QUALITY, effort: WEBP_UPLOAD_EFFORT })
     .withMetadata()
     .toBuffer();
 

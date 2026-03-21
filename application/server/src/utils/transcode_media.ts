@@ -4,9 +4,12 @@ import os from "node:os";
 import path from "node:path";
 
 import Encoding from "encoding-japanese";
+import { fileTypeFromBuffer } from "file-type";
 
 const UNKNOWN_ARTIST = "Unknown Artist";
 const UNKNOWN_TITLE = "Unknown Title";
+const MP3_EXTENSION = "mp3";
+const MP3_MIME_TYPE = "audio/mpeg";
 
 interface SoundConversionResult {
   artist: string;
@@ -117,9 +120,9 @@ export async function convertMovieToMp4(data: Buffer): Promise<Buffer> {
       "-c:v",
       "libx264",
       "-crf",
-      "32",
+      "22",
       "-preset",
-      "veryslow",
+      "ultrafast",
       "-movflags",
       "+faststart",
       "-an",
@@ -135,15 +138,28 @@ export async function convertMovieToMp4(data: Buffer): Promise<Buffer> {
 export async function convertSoundToMp3(
   data: Buffer,
 ): Promise<SoundConversionResult> {
+  const metadata = await extractMetadataFromSound(data);
+  const artist = metadata.artist;
+  const title = metadata.title;
+  const inputType = await fileTypeFromBuffer(data);
+
+  // MP3 は再エンコードせずそのまま返してアップロードを高速化する。
+  if (
+    inputType?.ext === MP3_EXTENSION ||
+    inputType?.mime === MP3_MIME_TYPE
+  ) {
+    return {
+      artist,
+      audio: data,
+      title,
+    };
+  }
+
   const tmpDir = await mkdtemp(path.join(os.tmpdir(), "cax-sound-"));
   const inputPath = path.join(tmpDir, "input");
   const outputPath = path.join(tmpDir, "output.mp3");
 
   try {
-    const metadata = await extractMetadataFromSound(data);
-    const artist = metadata.artist;
-    const title = metadata.title;
-
     await writeFile(inputPath, data);
 
     await runFfmpeg([
