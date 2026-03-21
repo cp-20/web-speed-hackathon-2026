@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet";
+import { Helmet } from "@web-speed-hackathon-2026/client/src/components/Helmet";
 import { useLocation } from "react-router";
 
 import { SearchPage } from "@web-speed-hackathon-2026/client/src/components/application/SearchPage";

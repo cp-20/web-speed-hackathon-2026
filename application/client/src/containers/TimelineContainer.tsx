@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet";
+import { Helmet } from "@web-speed-hackathon-2026/client/src/components/Helmet";
 
 import { InfiniteScroll } from "@web-speed-hackathon-2026/client/src/components/foundation/InfiniteScroll";
 import { TimelinePage } from "@web-speed-hackathon-2026/client/src/components/timeline/TimelinePage";

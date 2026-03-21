@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { Helmet } from "react-helmet";
+import { Helmet } from "@web-speed-hackathon-2026/client/src/components/Helmet";
 
 import { DirectMessageGate } from "@web-speed-hackathon-2026/client/src/components/direct_message/DirectMessageGate";
 import { DirectMessageListPage } from "@web-speed-hackathon-2026/client/src/components/direct_message/DirectMessageListPage";

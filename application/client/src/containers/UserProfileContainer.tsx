@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet";
+import { Helmet } from "@web-speed-hackathon-2026/client/src/components/Helmet";
 import { useParams } from "react-router";
 
 import { InfiniteScroll } from "@web-speed-hackathon-2026/client/src/components/foundation/InfiniteScroll";

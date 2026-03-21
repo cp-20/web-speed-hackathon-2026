@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet";
+import { Helmet } from "@web-speed-hackathon-2026/client/src/components/Helmet";
 
 interface Props {
   headline: string;

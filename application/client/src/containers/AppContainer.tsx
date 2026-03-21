@@ -1,5 +1,5 @@
 import { Suspense, lazy, useCallback, useEffect } from "react";
-import { Helmet } from "react-helmet";
+import { Helmet } from "@web-speed-hackathon-2026/client/src/components/Helmet";
 import { Route, Routes, useLocation, useNavigate } from "react-router";
 import { useSWRConfig } from "swr";
 
