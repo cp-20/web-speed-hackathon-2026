@@ -3,7 +3,6 @@ import path from "path";
 
 import { Router } from "express";
 import exifr from "exifr";
-import { fileTypeFromBuffer } from "file-type";
 import httpErrors from "http-errors";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
@@ -24,11 +23,6 @@ imageRouter.post("/images", async (req, res) => {
   }
   if (Buffer.isBuffer(req.body) === false) {
     throw new httpErrors.BadRequest();
-  }
-
-  const type = await fileTypeFromBuffer(req.body);
-  if (type === undefined || type.mime.startsWith("image/") !== true) {
-    throw new httpErrors.BadRequest("Invalid file type");
   }
 
   const metadata = await sharp(req.body).metadata();
