@@ -29,13 +29,34 @@ export async function fetchJSON<T>(url: string): Promise<T> {
 }
 
 export async function sendFile<T>(url: string, file: File): Promise<T> {
-  const response = await fetch(url, {
-    body: file,
-    headers: {
-      "Content-Type": "application/octet-stream",
-    },
-    method: "POST",
-  });
+  if (typeof CompressionStream === "undefined") {
+    const response = await fetch(url, {
+      body: file,
+      headers: {
+        "Content-Type": "application/octet-stream",
+      },
+      method: "POST",
+    });
+    return parseJSONResponse<T>(response);
+  }
+
+  const compressedBody = file.stream().pipeThrough(
+    new CompressionStream("gzip"),
+  );
+
+  const response = await fetch(
+    url,
+    {
+      body: compressedBody,
+      duplex: "half",
+      headers: {
+        "Content-Type": "application/octet-stream",
+        "Content-Encoding": "gzip",
+        "X-Original-Content-Type": file.type || "application/octet-stream",
+      },
+      method: "POST",
+    } as RequestInit & { duplex: "half" },
+  );
   return parseJSONResponse<T>(response);
 }
 
