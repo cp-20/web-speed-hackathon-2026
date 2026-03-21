@@ -5,8 +5,6 @@ import { unstable_serialize } from "swr/infinite";
 import type { SWRInfiniteKeyLoader } from "swr/infinite";
 
 import { AppContainerSsrContent } from "@web-speed-hackathon-2026/client/src/containers/AppContainerSsrContent";
-import { PostPage } from "@web-speed-hackathon-2026/client/src/components/post/PostPage";
-import { AppPage } from "@web-speed-hackathon-2026/client/src/components/application/AppPage";
 
 export type SsrPost = Models.Post;
 
@@ -77,36 +75,5 @@ export function renderAppSsr(params: {
         />
       </Router>
     </SWRConfig>,
-  );
-}
-
-/**
- * 旧: PostPage SSR（後方互換性のため残す）
- */
-export type SsrPostDeprecated = Models.Post;
-
-export type SsrCommentDeprecated = Models.Comment;
-
-export function renderPostPageSsr(params: {
-  comments: SsrCommentDeprecated[];
-  location: string;
-  post: SsrPostDeprecated;
-  activeUser: Models.User | null;
-}) {
-  const { comments, location, post, activeUser } = params;
-
-  const handleLogout = () => { };
-
-  return renderToString(
-    <Router ssrPath={location}>
-      <AppPage
-        activeUser={activeUser}
-        authModalId="auth-modal"
-        newPostModalId="new-post-modal"
-        onLogout={handleLogout}
-      >
-        <PostPage comments={comments} post={post} />
-      </AppPage>
-    </Router>,
   );
 }
